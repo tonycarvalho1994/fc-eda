@@ -1,6 +1,10 @@
 package kafka
 
-import ckafka "github.com/confluentinc/confluent-kafka-go/kafka"
+import (
+	"log"
+
+	ckafka "github.com/confluentinc/confluent-kafka-go/kafka"
+)
 
 type Consumer struct {
 	ConfigMap *ckafka.ConfigMap
@@ -15,6 +19,7 @@ func NewConsumer(configMap *ckafka.ConfigMap, topics []string) *Consumer {
 }
 
 func (c *Consumer) Consume(msgChan chan *ckafka.Message) error {
+	log.Println("Kafka consumer started")
 	consumer, err := ckafka.NewConsumer(c.ConfigMap)
 	if err != nil {
 		panic(err)
@@ -27,6 +32,10 @@ func (c *Consumer) Consume(msgChan chan *ckafka.Message) error {
 		msg, err := consumer.ReadMessage(-1)
 		if err == nil {
 			msgChan <- msg
+			_, err = consumer.CommitMessage(msg)
+            if err != nil {
+                log.Printf("Failed to commit message: %v", err)
+            }
 		}
 	}
 }

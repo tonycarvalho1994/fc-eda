@@ -1,0 +1,13 @@
+FROM golang:1.23
+
+WORKDIR /app/
+
+RUN apt-get update && apt-get install -y librdkafka-dev
+
+COPY . .
+
+RUN go mod tidy
+
+RUN go build -o /app/balance_service cmd/balance/main.go
+
+CMD ["/app/balance_service"]
